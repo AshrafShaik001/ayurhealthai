@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import api from '../api'
+import SaveResultsBanner from '../components/SaveResultsBanner'
 
 const DOSHA_CONFIG = {
   vata: {
@@ -494,6 +495,13 @@ function PlannerView({ routine: initialRoutine, onReset }) {
             <li>• Use "Reset Checklist" each morning to start fresh</li>
           </ul>
         </div>
+
+        {/* ── Save Results Banner ── */}
+        <SaveResultsBanner
+          type="dinacharya"
+          sessionId={routine.sessionId}
+          redirectTo={`/dinacharya`}
+        />
       </div>
     </div>
   )

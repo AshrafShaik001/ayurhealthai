@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../api'
 import { SYMPTOM_CATEGORIES, ALL_SYMPTOMS, calcDoshaScores } from '../data/symptomData'
 import { DOSHA_META } from '../data/quizQuestions'
+import SaveResultsBanner from '../components/SaveResultsBanner'
 
 // ─── Main ─────────────────────────────────────────────────────
 export default function SymptomChecker() {
@@ -568,6 +569,13 @@ function ResultsContent({ analysis, barsReady, onReset }) {
           ↩ Check Different Symptoms
         </button>
       </div>
+
+      {/* ── Save Results Banner ── */}
+      <SaveResultsBanner
+        type="symptoms"
+        sessionId={null}
+        redirectTo="/symptoms"
+      />
 
       {/* Disclaimer */}
       <p className="text-center text-xs text-gray-400 pb-4 max-w-2xl mx-auto">

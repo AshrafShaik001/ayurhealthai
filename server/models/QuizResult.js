@@ -49,6 +49,7 @@ const quizResultSchema = new mongoose.Schema(
     },
     dominantDosha:  { type: String, required: true },
     recommendation: recommendationSchema,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
   },
   { timestamps: true }
 )

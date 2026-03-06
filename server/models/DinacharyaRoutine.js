@@ -19,6 +19,7 @@ const dinacharyaRoutineSchema = new mongoose.Schema({
   doshaNote:  { type: String },
   completionDate: { type: String },               // ISO date string "YYYY-MM-DD"
   lastUpdated: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
 }, { timestamps: true })
 
 export default mongoose.model('DinacharyaRoutine', dinacharyaRoutineSchema)

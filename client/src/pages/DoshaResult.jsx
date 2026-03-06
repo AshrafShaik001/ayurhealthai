@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import api from '../api'
 import { DOSHA_META } from '../data/quizQuestions'
+import SaveResultsBanner from '../components/SaveResultsBanner'
 
 // ─── Main export ──────────────────────────────────────────────
 export default function DoshaResult() {
@@ -298,6 +299,13 @@ export default function DoshaResult() {
             </Link>
           </div>
         </div>
+
+        {/* ── Save Results Banner ── */}
+        <SaveResultsBanner
+          type="quiz"
+          sessionId={sessionId}
+          redirectTo={`/quiz/result/${sessionId}`}
+        />
 
         {/* Disclaimer */}
         <p className="text-center text-xs text-gray-400 pb-4">
