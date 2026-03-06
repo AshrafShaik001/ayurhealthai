@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ayur-cream text-gray-800 font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-ayur-leaf text-white px-5 py-2.5 rounded-lg font-medium
+           hover:bg-primary-700 transition-colors duration-200 shadow-sm;
+  }
+  .btn-secondary {
+    @apply border border-ayur-leaf text-ayur-leaf px-5 py-2.5 rounded-lg font-medium
+           hover:bg-ayur-leaf hover:text-white transition-colors duration-200;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-md p-6;
+  }
+}
