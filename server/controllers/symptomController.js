@@ -45,14 +45,21 @@ export async function analyzeSymptoms(req, res, next) {
     const primaryDosha = Object.entries(doshaScores).sort(([, a], [, b]) => b - a)[0]?.[0] ?? 'vata'
     const capitalised  = s => s.charAt(0).toUpperCase() + s.slice(1)
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      timeout: 90000, // 90 second timeout
+    })
+
+    // Limit symptoms to top 15 to keep prompt manageable
+    const limitedSymptoms = symptoms.slice(0, 15)
+
     const message = await anthropic.messages.create({
       model:      'claude-sonnet-4-6',
-      max_tokens: 8000,
-      system: `You are an expert Ayurvedic practitioner. Based on the user's dosha, give personalized recommendations for diet, daily routine, herbs, and lifestyle in JSON format. Always respond with valid JSON only — no markdown, no text outside the JSON.`,
+      max_tokens: 4000,
+      system: `You are an expert Ayurvedic practitioner. Respond with valid JSON only — no markdown, no text outside the JSON. Be concise.`,
       messages: [{
         role: 'user',
-        content: buildPrompt(symptoms, doshaScores, severity, capitalised(primaryDosha)),
+        content: buildPrompt(limitedSymptoms, doshaScores, severity, capitalised(primaryDosha)),
       }],
     })
 
@@ -78,6 +85,9 @@ export async function analyzeSymptoms(req, res, next) {
     if (err?.status === 429 || err?.message?.includes('rate')) {
       return res.status(502).json({ error: 'Too many requests. Please wait a moment and try again.' })
     }
+    if (err?.message?.includes('timeout') || err?.code === 'ETIMEDOUT' || err?.code === 'ECONNABORTED') {
+      return res.status(504).json({ error: 'Analysis is taking too long. Try selecting fewer symptoms and try again.' })
+    }
     return res.status(500).json({ error: err?.message || 'Analysis failed. Please try again.' })
   }
 }
@@ -90,83 +100,37 @@ function buildPrompt(symptoms, doshaScores, severity, primaryDosha) {
     .join('\n')
 
   return `
-A patient presents with the following ${symptoms.length} symptoms (severity: ${severity}):
+Patient symptoms (${severity} severity): ${symptomList}
 
-${symptomList}
+Dosha scores: ${scores}
 
-Preliminary dosha imbalance analysis based on symptom mapping:
-${scores}
-
-As an expert Ayurvedic practitioner, analyze these symptoms and provide a comprehensive response in this exact JSON format:
+Respond in this exact JSON format (be concise, keep descriptions brief):
 
 {
-  "primary_imbalance": "Vata | Pitta | Kapha (the most dominant imbalanced dosha)",
-  "secondary_imbalance": "Vata | Pitta | Kapha | None (second most affected, or 'None')",
+  "primary_imbalance": "Vata|Pitta|Kapha",
+  "secondary_imbalance": "Vata|Pitta|Kapha|None",
   "severity": "${severity}",
-  "dosha_scores": {
-    "vata": <integer 0-100>,
-    "pitta": <integer 0-100>,
-    "kapha": <integer 0-100>
-  },
-  "analysis": "3-4 warm, professional sentences explaining what these symptoms collectively indicate from an Ayurvedic perspective, which dosha systems are affected, and the root imbalance pattern",
-  "root_causes": [
-    "Root cause 1 from Ayurvedic perspective",
-    "Root cause 2",
-    "Root cause 3"
-  ],
+  "dosha_scores": {"vata": 0-100, "pitta": 0-100, "kapha": 0-100},
+  "analysis": "2-3 sentences on Ayurvedic perspective of these symptoms",
+  "root_causes": ["cause 1", "cause 2", "cause 3"],
   "natural_remedies": [
-    {
-      "title": "Remedy name",
-      "description": "How to prepare or apply this remedy",
-      "frequency": "How often to use",
-      "type": "dietary | herbal | topical | practice",
-      "dosha_target": "Which dosha imbalance it corrects"
-    }
+    {"title": "name", "description": "brief how-to", "frequency": "how often", "type": "dietary|herbal|topical|practice", "dosha_target": "dosha"}
   ],
   "herbs": [
-    {
-      "name": "Herb name in English",
-      "sanskrit": "Sanskrit / botanical name",
-      "addresses": "Which specific symptoms from the list it targets",
-      "preparation": "How to prepare (tea, powder, oil, etc.)",
-      "dosage": "Amount and frequency",
-      "caution": "Any cautions or contraindications (or 'None')"
-    }
+    {"name": "English name", "sanskrit": "Sanskrit name", "addresses": "symptoms targeted", "preparation": "how to use", "dosage": "amount+frequency", "caution": "caution or None"}
   ],
   "lifestyle_corrections": [
-    {
-      "area": "Sleep | Diet | Exercise | Stress | Routine | Environment",
-      "issue": "The specific Ayurvedic issue being corrected",
-      "correction": "Clear, actionable correction",
-      "timeframe": "Expected timeframe to notice improvement",
-      "priority": "high | medium | low"
-    }
+    {"area": "Sleep|Diet|Exercise|Stress|Routine", "issue": "Ayurvedic issue", "correction": "actionable fix", "timeframe": "timeframe", "priority": "high|medium|low"}
   ],
   "dietary_guidelines": {
-    "immediate_foods": [
-      "Food/drink — specific benefit for correcting the imbalance"
-    ],
-    "foods_to_avoid": [
-      "Food/drink — why it worsens the imbalance"
-    ],
-    "healing_recipe": {
-      "name": "Name of the Ayurvedic healing recipe",
-      "ingredients": ["ingredient 1", "ingredient 2"],
-      "instructions": "Step-by-step preparation",
-      "benefit": "Why this recipe specifically addresses these symptoms"
-    }
+    "immediate_foods": ["Food — benefit"],
+    "foods_to_avoid": ["Food — reason"],
+    "healing_recipe": {"name": "recipe name", "ingredients": ["ing1", "ing2"], "instructions": "brief steps", "benefit": "why it helps"}
   },
-  "when_to_seek_help": "Clear guidance on when these symptoms warrant consulting a doctor or Ayurvedic practitioner (be specific and responsible)",
-  "positive_affirmation": "One encouraging, warm closing note personalised to their healing journey"
+  "when_to_seek_help": "1-2 sentences on when to see a doctor",
+  "positive_affirmation": "One warm closing sentence"
 }
 
-Rules:
-- Include exactly 4 natural remedies
-- Include exactly 4 herbs
-- Include exactly 4 lifestyle corrections
-- Include exactly 4 immediate foods and 4 foods to avoid
-- Make all recommendations specific to ${primaryDosha} imbalance
-- The dosha_scores must add up to 100
-- Be warm, specific, and clinically responsible
+Rules: 3 remedies, 3 herbs, 3 lifestyle corrections, 3 foods each. Dosha scores sum to 100. Target ${primaryDosha} imbalance.
 `.trim()
 }

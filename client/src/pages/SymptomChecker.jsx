@@ -182,6 +182,7 @@ export default function SymptomChecker() {
               <p className="text-xs text-gray-500 font-medium mb-1.5">
                 {count} symptom{count !== 1 ? 's' : ''} selected
                 {!canAnalyze && <span className="text-amber-500"> — select at least 2</span>}
+                {count > 15 && <span className="text-amber-500"> — top 15 will be analysed</span>}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {[...selected].slice(0, 6).map(id => {
