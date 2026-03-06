@@ -36,6 +36,52 @@ const FOOD_LIST = [
 
 const MAX_FOODS = 6
 
+// ── Food → emoji map ───────────────────────────────────────────
+const FOOD_EMOJI = {
+  // Dairy
+  'Milk':'🥛','Ghee':'🧈','Butter':'🧈','Yogurt':'🫙','Curd':'🫙',
+  'Paneer':'🧀','Buttermilk':'🥛','Cream':'🍦','Cheese':'🧀',
+  // Fruits
+  'Banana':'🍌','Apple':'🍎','Mango':'🥭','Papaya':'🍈','Orange':'🍊',
+  'Lemon':'🍋','Lime':'🍋','Pomegranate':'🍒','Watermelon':'🍉',
+  'Pineapple':'🍍','Grapes':'🍇','Dates':'🌴','Figs':'🍓',
+  'Avocado':'🥑','Coconut':'🥥','Guava':'🍏','Peach':'🍑',
+  'Pear':'🍐','Melon':'🍈','Jackfruit':'🥝','Tamarind':'🌰','Amla':'🫒',
+  // Vegetables
+  'Spinach':'🥬','Tomato':'🍅','Onion':'🧅','Garlic':'🧄','Ginger':'🫚',
+  'Carrot':'🥕','Beetroot':'🟣','Broccoli':'🥦','Cauliflower':'🤍',
+  'Cucumber':'🥒','Pumpkin':'🎃','Sweet Potato':'🍠','Potato':'🥔',
+  'Eggplant':'🍆','Radish':'🌱','Bottle Gourd':'🥒','Bitter Gourd':'🥒',
+  'Drumstick':'🥬','Peas':'🫛','Corn':'🌽','Asparagus':'🥬','Celery':'🥬',
+  // Grains
+  'Rice':'🍚','Wheat':'🌾','Barley':'🌾','Oats':'🌾','Millet':'🌾',
+  'Quinoa':'🌾','Rye':'🌾','Buckwheat':'🌾','Semolina':'🌾',
+  // Legumes
+  'Lentils':'🫘','Chickpeas':'🫘','Moong Dal':'🫘','Toor Dal':'🫘',
+  'Kidney Beans':'🫘','Black Beans':'🫘','Soybeans':'🫘','Tofu':'⬜',
+  'Urad Dal':'🫘','Chana Dal':'🫘',
+  // Protein
+  'Eggs':'🥚','Chicken':'🍗','Fish':'🐟','Lamb':'🥩','Beef':'🥩',
+  'Pork':'🥩','Shrimp':'🦐',
+  // Nuts & Seeds
+  'Almonds':'🌰','Walnuts':'🌰','Cashews':'🌰','Pistachios':'🌰',
+  'Peanuts':'🥜','Sesame Seeds':'🌿','Flax Seeds':'🌱','Chia Seeds':'🌱',
+  'Pumpkin Seeds':'🌱','Sunflower Seeds':'🌻',
+  // Spices & Herbs
+  'Turmeric':'🌿','Cumin':'🌿','Coriander':'🌿','Cardamom':'🌿',
+  'Cinnamon':'🟤','Black Pepper':'⚫','Fenugreek':'🌿','Asafoetida':'🌿',
+  'Cloves':'🌿','Nutmeg':'🌰','Saffron':'🌸','Mustard Seeds':'🌿',
+  'Bay Leaves':'🍃','Star Anise':'⭐','Chili':'🌶️','Dill':'🌿',
+  'Mint':'🌿','Basil':'🌿','Parsley':'🌿',
+  // Oils & Sweeteners
+  'Coconut Oil':'🥥','Olive Oil':'🫒','Sesame Oil':'🫙','Mustard Oil':'🫙',
+  'Honey':'🍯','Jaggery':'🟫','Sugar':'🍬',
+  // Beverages / Other
+  'Green Tea':'🍵','Coffee':'☕','Black Tea':'🍵','Aloe Vera':'🌵',
+  'Neem':'🌿','Ashwagandha':'🌿','Triphala':'🌿',
+}
+const getFoodEmoji = (food) => FOOD_EMOJI[food] || '🍽️'
+
 // ── Status configs ─────────────────────────────────────────────
 const STATUS = {
   good:    { icon: '✅', label: 'Compatible',   bg: 'bg-emerald-50',  border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700' },
@@ -82,7 +128,7 @@ function ScoreRing({ score }) {
 function FoodChip({ label, onRemove }) {
   return (
     <span className="inline-flex items-center gap-1.5 bg-ayur-leaf/10 text-ayur-bark text-sm font-medium px-3 py-1.5 rounded-xl border border-ayur-leaf/30">
-      🌿 {label}
+      {getFoodEmoji(label)} {label}
       <button
         onClick={onRemove}
         className="ml-0.5 text-gray-400 hover:text-red-500 transition-colors rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold leading-none"
@@ -387,7 +433,7 @@ export default function FoodCompatibility() {
                       onMouseDown={e => { e.preventDefault(); addFood(food) }}
                       className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-ayur-bark transition-colors flex items-center gap-2"
                     >
-                      <span className="text-ayur-leaf">🌿</span> {food}
+                      <span>{getFoodEmoji(food)}</span> {food}
                     </button>
                   ))}
                   {/* Custom add hint */}
